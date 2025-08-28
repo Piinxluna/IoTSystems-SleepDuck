@@ -2,7 +2,7 @@ const xValues = ['Italy', 'France', 'Spain', 'USA', 'Argentina']
 const yValues = [55, 49, 44, 24, 15]
 const barColors = ['red', 'green', 'blue', 'orange', 'brown']
 
-new Chart('myChart', {
+new Chart('motion-chart', {
   type: 'bar',
   data: {
     labels: xValues,
