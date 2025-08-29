@@ -37,6 +37,16 @@ app.get('/data', async (req, res) => {
   }
 })
 
+app.get('/__delete-all', async (req, res) => {
+  try {
+    const deletedData = await SensorData.deleteMany({})
+    res.status(200).json(deletedData);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to fetch latest data' });
+  }
+});
+
 app.get('/__debug', async (req, res) => {
   const collections = await mongoose.connection.db.listCollections().toArray();
   const modelColl = SensorData.collection.name;         // which collection your model targets
