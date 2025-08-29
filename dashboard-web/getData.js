@@ -1,28 +1,31 @@
-// Import Firebase modules (v9+ modular syntax)
-import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js'
-import {
-  getDatabase,
-  ref,
-  onValue,
-} from 'https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js'
+import { updateData } from './updateData.js';
+import { updateChart } from './updateChart.js';
 
-const firebaseConfig = require('./firebase-config.json')
+async function getData() {
+  const url = "https://iot-systems-sleep-duck.vercel.app/data";
+  try {
+    const response = await fetch(url, { cache: "no-store" });
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig)
-const db = getDatabase(app)
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
 
-// Reference to your data (example: "sensorData")
-const dataRef = ref(db, 'sensorData')
-
-// Listen for data changes repeatedly
-onValue(dataRef, (snapshot) => {
-  const data = snapshot.val()
-  const container = document.getElementById('current-data')
-
-  if (data) {
-    container.innerHTML = JSON.stringify(data, null, 2) // Display as formatted JSON
-  } else {
-    container.innerHTML = 'No data found'
+    const result = await response.json();
+    console.log("Data fetched successfully:", result);
+    updateData(result)
+    updateChart(result)
+  } catch (error) {
+    console.error(error.message);
   }
-})
+}
+
+// Start the loop to constantly fetch data
+async function loop() {
+  try {
+    getData()
+  } finally {
+    setTimeout(loop, 1000);
+  }
+}
+
+loop();
