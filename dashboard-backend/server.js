@@ -1,12 +1,14 @@
 require('dotenv').config();
 
 const express = require('express')
+const cors = require('cors')
 const app = express()
 const mongoose = require('mongoose')
 const SensorData = require('./models/sensorData')
 
 app.use(express.json())
 
+// Connecting to db
 console.log('Connecting to MongoDB...', process.env.DATABASE_URL)
 mongoose.connect(process.env.DATABASE_URL, { useNewUrlParser: true }).then(() => {
   console.log('MongoDB connected');
@@ -17,6 +19,10 @@ mongoose.connect(process.env.DATABASE_URL, { useNewUrlParser: true }).then(() =>
     process.exit(1);
   });
 
+// allow request from other origin (Frontend which is at different port)
+app.use(cors());
+
+// API endpoints
 app.get('/', (req, res) => {
   res.json({ message: 'Hello world!' })
 })
@@ -24,7 +30,6 @@ app.get('/', (req, res) => {
 app.get('/data', async (req, res) => {
   try {
     const data = await SensorData.find();
-    console.log('current data', data);
     res.status(200).json(data);
   } catch (err) {
     console.error(err);
@@ -44,7 +49,7 @@ app.get('/__debug', async (req, res) => {
   });
 });
 
-
+// Start server
 app.listen(9000, () => {
   console.log('Application is running on port 9000')
 })
