@@ -3,7 +3,7 @@ const mongoose = require('mongoose')
 const sensorDataSchema = new mongoose.Schema(
   {
     heartRate: Number,
-    motion: Boolean,
+    motion: Number,
     humid: Number,
     temp: Number,
     sound: Number,
