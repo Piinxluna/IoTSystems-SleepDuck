@@ -304,10 +304,7 @@ export function updateChart(data) {
   });
 
   // Sleep Quality Average
-  const sleepScore = Math.round(
-    processedData.sleepQuality.reduce((sum, val) => sum + val, 0) /
-    Math.max(1, processedData.sleepQuality.length)
-  );
+  const sleepScore = processedData.sleepQuality[processedData.sleepQuality.length - 1]
 
   sleepQualityChart.updateSeries([sleepScore]);
 
