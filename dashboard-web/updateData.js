@@ -24,7 +24,7 @@ export function updateData(data) {
 
 // Utils
 function getLightLevel(light) {
-  return light < 5 ? 'Low' : light < 20 ? 'Medium' : 'High'
+  return light < 30 ? 'Low' : light < 60 ? 'Medium' : 'High'
 }
 
 function getSoundLevel(sound) {
