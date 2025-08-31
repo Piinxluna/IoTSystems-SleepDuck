@@ -73,11 +73,11 @@ app.get('/data/latest-24-hours', async (req, res) => {
 
     const data = await SensorData.find({
       currentTime: { $gte: filterString },
-    }).sort({ currentTime: 1 })
+    })
 
     const formatData = data.map((item) => ({
       ...item._doc,
-      currentTime: new Date(item.currentTime),
+      currentTime: item.currentTime,
     }))
 
     res.status(200).json(formatData)
