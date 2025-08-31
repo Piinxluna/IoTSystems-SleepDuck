@@ -7,9 +7,6 @@ const humidity = document.getElementById('humidity-chart');
 const temperature = document.getElementById('temperature-chart');
 
 // ----------- CONFIG AND HELPERS -----------
-const WINDOW_MS = 24 * 60 * 60 * 1000; // 24 hours
-const HOUR_MS = 60 * 60 * 1000; // 1 hour
-
 const standardXAxisConfig = {
   type: 'datetime',
   labels: {
@@ -30,38 +27,6 @@ const standardLineChartConfig = {
     }
   }
 };
-
-function toMs(ts) { if (typeof ts === 'number') { return ts > 1e12 ? ts : ts * 1000; } return new Date(ts).getTime(); }
-
-function getHourAnchoredWindowIncludeCurrent({ utc = false } = {}) {
-  const now = new Date();
-  const ceil = new Date(now);
-  if (utc) {
-    ceil.setUTCMinutes(0, 0, 0);
-    if (now.getUTCMinutes() !== 0 || now.getUTCSeconds() !== 0 || now.getUTCMilliseconds() !== 0) {
-      ceil.setUTCHours(ceil.getUTCHours() + 1);
-    }
-  } else {
-    ceil.setMinutes(0, 0, 0);
-    if (now.getMinutes() !== 0 || now.getSeconds() !== 0 || now.getMilliseconds() !== 0) {
-      ceil.setHours(ceil.getHours() + 1);
-    }
-  }
-  const endMs = ceil.getTime();
-  return { start: endMs - WINDOW_MS, end: endMs };
-}
-
-function filterRange(series, start, end) {
-  return series
-    .map(p => ({ x: toMs(p.x), y: p.y }))
-    .filter(p => Number.isFinite(p.x) && p.x >= start && p.x < end);
-}
-
-function applyWindow(chart, start, end) {
-  chart.updateOptions({
-    xaxis: { ...standardXAxisConfig, min: start, max: end }
-  }, false, true);
-}
 
 // ----------- Sleep Quality Chart Options -----------
 const sleepQualityOptions = {
@@ -124,9 +89,6 @@ const heartRateOptions = {
     curve: 'smooth',
     width: 2
   },
-  markers: {
-    size: 3
-  },
   xaxis: { ...standardXAxisConfig },
   tooltip: {
     x: {
@@ -151,25 +113,10 @@ const heartRateOptions = {
 
 // ----------- Motion Options -----------
 const motionOptions = {
-  chart: {
-    height: 350,
-    type: 'bar',
-    animations: {
-      enabled: true,
-      easing: 'linear',
-      dynamicAnimation: {
-        speed: 1000
-      }
-    }
-  },
-  plotOptions: {
-    bar: {
-      columnWidth: '80%',
-    }
-  },
-  title: {
-    text: 'Motion Count',
-    align: 'left'
+  chart: { ...standardLineChartConfig },
+  stroke: {
+    curve: 'smooth',
+    width: 2
   },
   xaxis: { ...standardXAxisConfig },
   tooltip: {
@@ -179,16 +126,18 @@ const motionOptions = {
   },
   yaxis: {
     title: {
-      text: 'Count'
+      text: 'Rate (%)'
     },
     min: 0,
-    max: function (max) { return max < 5 ? 5 : max + 2 },
-    forceNiceScale: true,
+    max: 100
   },
-  dataLabels: {
-    enabled: false
+  title: {
+    text: 'Motion Rate',
+    align: 'left'
   },
-  series: [],
+  legend: {
+    position: 'top'
+  }
 };
 
 // ----------- Light Options -----------
@@ -197,9 +146,6 @@ const lightOptions = {
   stroke: {
     curve: 'smooth',
     width: 2
-  },
-  markers: {
-    size: 3
   },
   xaxis: { ...standardXAxisConfig },
   tooltip: {
@@ -231,9 +177,6 @@ const soundOptions = {
     curve: 'smooth',
     width: 2
   },
-  markers: {
-    size: 3
-  },
   xaxis: { ...standardXAxisConfig },
   tooltip: {
     x: {
@@ -244,9 +187,9 @@ const soundOptions = {
     title: {
       text: 'db (A)'
     },
-    min: 10,
-    max: 30,
-    forceNiceScale: true,
+    min: 0,
+    max: function (max) { return max + 10 },
+    forceNiceScale: false,
   },
   title: {
     text: 'Sound Intensity',
@@ -263,9 +206,6 @@ const humidityOptions = {
   stroke: {
     curve: 'smooth',
     width: 2
-  },
-  markers: {
-    size: 3
   },
   xaxis: { ...standardXAxisConfig },
   tooltip: {
@@ -296,9 +236,6 @@ const temperatureOptions = {
   stroke: {
     curve: 'smooth',
     width: 2
-  },
-  markers: {
-    size: 3
   },
   xaxis: { ...standardXAxisConfig },
   tooltip: {
@@ -344,7 +281,7 @@ export function updateChart(data) {
     // Parse all values safely with defaults
     const timestamp = element.currentTime;
     const heartRate = parseInt(element.heartRate) || 0;
-    const motion = element.motion === true || element.motion === 1 ? 1 : 0;
+    const motion = element.motion * 100;
     const light = parseInt(element.light) || 0;
     const sound = parseInt(element.sound) || 0;
     const humidity = parseInt(element.humid) || 0;
@@ -371,9 +308,6 @@ export function updateChart(data) {
     humidity: [],
     temperature: []
   });
-
-  // Set the time window
-  const { start, end } = getHourAnchoredWindowIncludeCurrent({ utc: false });
 
   // Sleep Quality Average
   const sleepScore = Math.round(
@@ -407,58 +341,36 @@ export function updateChart(data) {
   // Heart Rate
   heartRateChart.updateSeries([{
     name: 'Heart Rate',
-    data: filterRange(processedData.heartRate, start, end)
+    data: processedData.heartRate
   }]);
-  applyWindow(heartRateChart, start, end);
 
   // Motion
-  const motionBuckets = Array.from({ length: 24 }, (_, i) => ({
-    x: start + i * HOUR_MS,
-    y: 0
-  }));
-
-  // Count motion events per hour
-  processedData.motion.forEach(item => {
-    const x = toMs(item.x);
-    if (x >= start && x < end && item.y > 0) {
-      const hourIndex = Math.floor((x - start) / HOUR_MS);
-      if (hourIndex >= 0 && hourIndex < 24) {
-        motionBuckets[hourIndex].y += 1;
-      }
-    }
-  });
-
   motionChart.updateSeries([{
     name: 'Motion Count',
-    data: motionBuckets
+    data: processedData.motion
   }]);
-  applyWindow(motionChart, start, end);
 
   // Light
   lightChart.updateSeries([{
     name: 'Light',
-    data: filterRange(processedData.light, start, end)
+    data: processedData.light
   }]);
-  applyWindow(lightChart, start, end);
 
   // Sound
   soundChart.updateSeries([{
     name: 'Sound',
-    data: filterRange(processedData.sound, start, end)
+    data: processedData.sound
   }]);
-  applyWindow(soundChart, start, end);
 
   // Humidity
   humidChart.updateSeries([{
     name: 'Humidity',
-    data: filterRange(processedData.humidity, start, end)
+    data: processedData.humidity
   }]);
-  applyWindow(humidChart, start, end);
 
   // Temperature
   tempChart.updateSeries([{
     name: 'Temperature',
-    data: filterRange(processedData.temperature, start, end)
+    data: processedData.temperature
   }]);
-  applyWindow(tempChart, start, end);
 }

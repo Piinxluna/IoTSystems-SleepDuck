@@ -2,7 +2,7 @@ import { updateData } from './updateData.js'
 import { updateChart } from './updateChart.js'
 
 async function getData() {
-  const url = 'https://iot-systems-sleep-duck.vercel.app/data'
+  const url = 'https://iot-systems-sleep-duck.vercel.app/data/latest-24-hours'
   try {
     const response = await fetch(url, { cache: 'no-store' })
 
@@ -11,7 +11,6 @@ async function getData() {
     }
 
     const result = await response.json()
-    console.log('Data fetched successfully:', result)
     updateData(result[result.length - 1])
     updateChart(result)
   } catch (error) {
@@ -24,7 +23,7 @@ async function loop() {
   try {
     getData()
   } finally {
-    setTimeout(loop, 1000)
+    setTimeout(loop, 10000)
   }
 }
 

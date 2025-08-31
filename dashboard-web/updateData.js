@@ -7,8 +7,6 @@ export function updateData(data) {
   // Update display
   const { heartRate, humid, light, motion, sound, temp } = data
 
-  console.log(data)
-
   const lightLevel = getLightLevel(data.light)
   const soundLevel = getSoundLevel(data.sound)
 
