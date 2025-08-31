@@ -140,7 +140,7 @@ function computeSleepQuality(reading, weights = DEFAULT_WEIGHTS) {
     subs.sound * weights.sound +
     subs.light * weights.light;
 
-  if (heartRate === 0){
+  if (heartRate <= 30){
     score = 0;
   }
   return Math.round(score * 100) / 100;
