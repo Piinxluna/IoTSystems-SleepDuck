@@ -13,31 +13,37 @@
 </head>
 
 
-<body class="container mx-auto p-4 flex flex-col gap-8">
+<body class="container mx-auto p-4 flex flex-col gap-8 bg-gray-100">
   <!-- Header -->
   <div class="flex flex-col gap-2">
     <h1 class="text-3xl font-bold text-center">Sleep Quality Detector</h1>
     <h2 id="today-date" class="text-lg text-center">Today</h2>
   </div>
-    
+
   <!-- Device Status -->
   <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
     <p class="text-xl font-bold col-span-1 sm:col-span-2">Device Status</p>
-    <div class="p-4 border border-gray-300 rounded flex justify-between items-center gap-4">
+    <div class="p-4 border border-gray-300 bg-white rounded-2xl flex justify-between items-center gap-4">
       <div class="flex flex-col">
-        <p class="text-lg font-bold" >ESP32 Sensor Node</p>
-        <p class="text-sm" >Measure: Heart Rate, Motion</p>
+        <p class="text-lg font-bold">ESP32 Sensor Node</p>
+        <p class="text-sm">Measure: Heart Rate, Motion</p>
       </div>
-      <p class="font-semibold py-2 px-3 rounded-full border" id="esp32-status">Online</p>
+      <div class="flex flex-row items-center gap-2 py-2 px-3 rounded-full border">
+        <div class="h-3 w-3 bg-green-500 rounded-full"></div>
+        <p class="font-semibold" id="esp32-status">Online</p>
+      </div>
     </div>
-    <div class="p-4 border border-gray-300 rounded flex justify-between items-center gap-4">
+    <div class="p-4 border border-gray-300 bg-white rounded-2xl flex justify-between items-center gap-4">
       <div class="flex flex-col">
-        <p class="text-lg font-bold" >Raspberry Pi 5</p>
-        <p class="text-sm" >Measure: Light, Temperature, Humidity, Sound</p>
+        <p class="text-lg font-bold">Raspberry Pi 5</p>
+        <p class="text-sm">Measure: Light, Temperature, Humidity, Sound</p>
       </div>
-      <p class="font-semibold py-2 px-3 rounded-full border" id="raspberri-pi-5-status">Online</p>
+      <div class="flex flex-row items-center gap-2 py-2 px-3 rounded-full border">
+        <div class="h-3 w-3 bg-green-500 rounded-full"></div>
+        <p class="font-semibold" id="raspberri-pi-5-status">Online</p>
+      </div>
     </div>
-	</div>
+  </div>
 
   <!-- Overview status -->
   <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -51,28 +57,28 @@
       <span id="kpi-hum"></span>
       <span id="kpi-temp"></span>
     </div>
-    <div class="p-4 border border-gray-300 rounded flex flex-col gap-2 col-span-1 sm:col-span-2">
+    <div class="p-4 border border-gray-300 bg-white rounded-2xl flex flex-col gap-2 col-span-1 sm:col-span-2">
       <div class="flex flex-col justify-between">
         <div class="flex item-center gap-4">
-          <div class="w-10 h-10 bg-gray-100 rounded flex items-center justify-center">
+          <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
             <i class="fa-solid fa-moon" style="color: red"></i>
           </div>
           <div class="flex flex-col">
-            <p class="text-lg font-bold" >Sleep Quality</p>
+            <p class="text-lg font-bold">Sleep Quality</p>
             <p class="text-sm">Based on heart rate, motion, and environment factors</p>
           </div>
         </div>
         <div id="sleep-quality-chart" style="width:100%;max-width:320px" class="mx-auto"></div>
       </div>
     </div>
-    <div class="p-4 border border-gray-300 rounded flex flex-col gap-2">
+    <div class="p-4 border border-gray-300 bg-white rounded-2xl flex flex-col gap-2">
       <div class="flex item-center gap-4">
-        <div class="w-10 h-10 bg-gray-100 rounded flex items-center justify-center">
+        <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
           <i class="fa-solid fa-heart" style="color: red"></i>
         </div>
         <div>
           <p class="text-lg font-bold">Heart Rate</p>
-          <p class="text-sm" >Current BPM</p>
+          <p class="text-sm">Current BPM</p>
         </div>
       </div>
       <div>
@@ -81,32 +87,32 @@
       </div>
       <p class="text-xs ">Healthy: 60-100 bpm</p>
     </div>
-    <div class="p-4 border border-gray-300 rounded flex flex-col gap-2">
+    <div class="p-4 border border-gray-300 bg-white rounded-2xl flex flex-col gap-2">
       <div class="flex item-center gap-4">
-        <div class="w-10 h-10 bg-gray-100 rounded flex items-center justify-center">
+        <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
           <i class="fa-solid fa-person" style="color: red"></i>
         </div>
         <div>
           <p class="text-lg font-bold">Motion</p>
-          <p class="text-sm" >Tracks body movement during sleep</p>
+          <p class="text-sm">Tracks body movement during sleep</p>
         </div>
       </div>
       <div class="flex flex-col gap-2">
-      <div>
-        <span id="motion-data" class="text-lg font-semibold">Loading</span>
-        <span>Events</span>
+        <div>
+          <span id="motion-data" class="text-lg font-semibold">Loading</span>
+          <!-- <span>Events</span> -->
+        </div>
+        <p class="text-sm"></p>
       </div>
-      <p class="text-sm"></p>
     </div>
-    </div>
-    <div class="p-4 border border-gray-300 rounded flex flex-col gap-2">
+    <div class="p-4 border border-gray-300 bg-white rounded-2xl flex flex-col gap-2">
       <div class="flex item-center gap-4">
-        <div class="w-10 h-10 bg-gray-100 rounded flex items-center justify-center">
+        <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
           <i class="fa-solid fa-lightbulb" style="color: red"></i>
         </div>
         <div>
           <p class="text-lg font-bold">Light</p>
-          <p class="text-sm" >Room Brightness</p>
+          <p class="text-sm">Room Brightness</p>
         </div>
       </div>
       <div>
@@ -115,14 +121,14 @@
       </div>
       <p class="text-xs ">Comfort: less than or equal 3 lux</p>
     </div>
-    <div class="p-4 border border-gray-300 rounded flex flex-col gap-2">
+    <div class="p-4 border border-gray-300 bg-white rounded-2xl flex flex-col gap-2">
       <div class="flex item-center gap-4">
-        <div class="w-10 h-10 bg-gray-100 rounded flex items-center justify-center">
+        <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
           <i class="fa-solid fa-microphone" style="color: red"></i>
         </div>
         <div>
           <p class="text-lg font-bold">Sound Level</p>
-          <p class="text-sm" >Snoring and Environmental Noise</p>
+          <p class="text-sm">Snoring and Environmental Noise</p>
         </div>
       </div>
       <div>
@@ -130,14 +136,14 @@
         <span id="sound-data" class="text-sm">Loading</span>
       </div>
     </div>
-    <div class="p-4 border border-gray-300 rounded flex flex-col gap-2">
+    <div class="p-4 border border-gray-300 bg-white rounded-2xl flex flex-col gap-2">
       <div class="flex item-center gap-4">
-        <div class="w-10 h-10 bg-gray-100 rounded flex items-center justify-center">
+        <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
           <i class="fa-solid fa-droplet" style="color: red"></i>
         </div>
         <div>
           <p class="text-lg font-bold">Humidity</p>
-          <p class="text-sm" >Air Moisture</p>
+          <p class="text-sm">Air Moisture</p>
         </div>
       </div>
       <div>
@@ -146,14 +152,14 @@
       </div>
       <p class="text-xs ">Comfort: 40–60 %RH</p>
     </div>
-    <div class="p-4 border border-gray-300 rounded flex flex-col gap-2">
+    <div class="p-4 border border-gray-300 bg-white rounded-2xl flex flex-col gap-2">
       <div class="flex items-center gap-4">
-        <div class="w-10 h-10 bg-gray-100 rounded flex items-center justify-center">
+        <div class="w-10 h-10 bg-gray-100 rounded-2xl flex items-center justify-center">
           <i class="fa-solid fa-temperature-half" style="color: red"></i>
         </div>
         <div>
           <p class="text-lg font-bold">Temperature</p>
-          <p class="text-sm" >Room Temperature</p>
+          <p class="text-sm">Room Temperature</p>
         </div>
       </div>
       <div>
@@ -162,50 +168,50 @@
       </div>
       <p class="text-xs ">Comfort: 24–28 °C</p>
     </div>
-	</div>
+  </div>
 
   <!-- Live data; Chart -->
   <div class="flex flex-col gap-4">
     <p class="text-xl font-bold">Live Data</p>
-    <div class="p-4 border border-gray-300 rounded flex flex-col gap-2">
+    <div class="p-4 border border-gray-300 bg-white rounded-2xl flex flex-col gap-2">
       <div>
         <p class="text-lg font-bold">Heart Rate</p>
-        <p class="text-sm" >Beats per minute (bpm)</p>
+        <p class="text-sm">Beats per minute (bpm)</p>
       </div>
       <div id="heart-rate-chart" style="width:100%;max-width:800px;" class="mx-auto"></div>
     </div>
-    <div class="p-4 border border-gray-300 rounded flex flex-col gap-2">
+    <div class="p-4 border border-gray-300 bg-white rounded-2xl flex flex-col gap-2">
       <div>
         <p class="text-lg font-bold">Motion</p>
-        <p class="text-sm" >Tracks body movement during sleep</p>
+        <p class="text-sm">Tracks body movement during sleep</p>
       </div>
       <div id="motion-chart" style="width:100%;max-width:800px" class="mx-auto"></div>
     </div>
-    <div class="p-4 border border-gray-300 rounded flex flex-col gap-2">
+    <div class="p-4 border border-gray-300 bg-white rounded-2xl flex flex-col gap-2">
       <div>
         <p class="text-lg font-bold">Light</p>
-        <p class="text-sm" >Ambient light (lux)</p>
+        <p class="text-sm">Ambient light (lux)</p>
       </div>
       <div id="light-chart" style="width:100%;max-width:800px" class="mx-auto"></div>
     </div>
-    <div class="p-4 border border-gray-300 rounded flex flex-col gap-2">
+    <div class="p-4 border border-gray-300 bg-white rounded-2xl flex flex-col gap-2">
       <div>
         <p class="text-lg font-bold">Sound</p>
-        <p class="text-sm" >Snoring and Environmental Noise (dB(A))</p>
+        <p class="text-sm">Snoring and Environmental Noise (dB(A))</p>
       </div>
       <div id="sound-chart" style="width:100%;max-width:800px;" class="mx-auto"></div>
     </div>
-    <div class="p-4 border border-gray-300 rounded flex flex-col gap-2">
+    <div class="p-4 border border-gray-300 bg-white rounded-2xl flex flex-col gap-2">
       <div>
         <p class="text-lg font-bold">Humidity</p>
-        <p class="text-sm" >Relative humidity (%RH)</p>
+        <p class="text-sm">Relative humidity (%RH)</p>
       </div>
       <div id="humidity-chart" style="width:100%;max-width:800px" class="mx-auto"></div>
     </div>
-    <div class="p-4 border border-gray-300 rounded flex flex-col gap-2">
+    <div class="p-4 border border-gray-300 bg-white rounded-2xl flex flex-col gap-2">
       <div>
         <p class="text-lg font-bold">Temperature</p>
-        <p class="text-sm" >Ambient temperature (°C)</p>
+        <p class="text-sm">Ambient temperature (°C)</p>
       </div>
       <div id="temperature-chart" style="width:100%;max-width:800px" class="mx-auto"></div>
     </div>

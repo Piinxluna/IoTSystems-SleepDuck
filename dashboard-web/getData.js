@@ -1,21 +1,21 @@
-import { updateData } from './updateData.js';
-import { updateChart } from './updateChart.js';
+import { updateData } from './updateData.js'
+import { updateChart } from './updateChart.js'
 
 async function getData() {
-  const url = "https://iot-systems-sleep-duck.vercel.app/data";
+  const url = 'https://iot-systems-sleep-duck.vercel.app/data'
   try {
-    const response = await fetch(url, { cache: "no-store" });
+    const response = await fetch(url, { cache: 'no-store' })
 
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      throw new Error(`HTTP error! status: ${response.status}`)
     }
 
-    const result = await response.json();
-    console.log("Data fetched successfully:", result);
-    updateData(result)
+    const result = await response.json()
+    console.log('Data fetched successfully:', result)
+    updateData(result[result.length - 1])
     updateChart(result)
   } catch (error) {
-    console.error(error.message);
+    console.error(error.message)
   }
 }
 
@@ -24,8 +24,8 @@ async function loop() {
   try {
     getData()
   } finally {
-    setTimeout(loop, 1000);
+    setTimeout(loop, 1000)
   }
 }
 
-loop();
+loop()
