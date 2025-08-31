@@ -64,6 +64,29 @@ app.get('/data/today', async (req, res) => {
   }
 })
 
+app.get('/data/latest-24-hours', async (req, res) => {
+  try {
+    const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000)
+    const dateString = oneDayAgo.toISOString().split('T')[0]
+    const timeString = oneDayAgo.toTimeString().split(' ')[0]
+    const filterString = `${dateString} ${timeString}`
+
+    const data = await SensorData.find({
+      currentTime: { $gte: filterString },
+    }).sort({ currentTime: 1 })
+
+    const formatData = data.map((item) => ({
+      ...item._doc,
+      currentTime: new Date(item.currentTime),
+    }))
+
+    res.status(200).json(formatData)
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ error: 'Failed to fetch data' })
+  }
+})
+
 app.get('/__delete-all', async (req, res) => {
   try {
     const deletedData = await SensorData.deleteMany({})
