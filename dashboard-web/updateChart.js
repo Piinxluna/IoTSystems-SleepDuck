@@ -281,7 +281,7 @@ export function updateChart(data) {
     // Parse all values safely with defaults
     const timestamp = element.currentTime;
     const heartRate = parseInt(element.heartRate) || 0;
-    const motion = element.motion * 100;
+    const motion = parseInt(element.motion * 100);
     const light = parseInt(element.light) || 0;
     const sound = parseInt(element.sound) || 0;
     const humidity = parseInt(element.humid) || 0;

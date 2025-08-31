@@ -12,7 +12,7 @@ export function updateData(data) {
 
   document.getElementById('heart-rate-data').innerText = `${round(heartRate)}`
   document.getElementById('motion-data').innerText = `${
-    motion ? 'Detected' : 'Not Detected'
+    motion != 0 ? 'Detected' : 'Not Detected'
   }`
   document.getElementById('light-level').innerText = `${lightLevel}`
   document.getElementById('light-data').innerText = `(${round(light)} lux)`
@@ -32,7 +32,9 @@ function getSoundLevel(sound) {
 }
 
 function round(num, decimalPlaces) {
-  if (!decimalPlaces) decimalPlaces = 0
+  if (!decimalPlaces) {
+    decimalPlaces = 0;
+  }
 
   return (
     Math.round(num * Math.pow(10, decimalPlaces)) / Math.pow(10, decimalPlaces)
