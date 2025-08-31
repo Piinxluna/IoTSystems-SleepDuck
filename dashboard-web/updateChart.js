@@ -154,9 +154,6 @@ const lightOptions = {
     }
   },
   yaxis: {
-    title: {
-      text: 'lux'
-    },
     min: 0,
     max: function (max) { return max + 20 },
     forceNiceScale: true,
@@ -184,9 +181,6 @@ const soundOptions = {
     }
   },
   yaxis: {
-    title: {
-      text: 'db (A)'
-    },
     min: 0,
     max: function (max) { return max + 10 },
     forceNiceScale: false,

@@ -88,7 +88,7 @@ const DEFAULT_WEIGHTS = {
 const clamp = (v, lo = 0, hi = 100) => Math.max(lo, Math.min(hi, v));
 
 function heartRateScore(bpm) {
-  return plateauScore(bpm, { minLow: 40, idealLow: 45, idealHigh: 60, maxHigh: 90 });
+  return plateauScore(bpm, { minLow: 40, idealLow: 45, idealHigh: 60, maxHigh: 100 });
 }
 
 function motionScore(motion01) {
@@ -96,7 +96,7 @@ function motionScore(motion01) {
 }
 
 function temperatureScore(celsius) {
-  return plateauScore(celsius, { minLow: 22, idealLow: 24, idealHigh: 28, maxHigh: 32 });
+  return plateauScore(celsius, { minLow: 20, idealLow: 24, idealHigh: 28, maxHigh: 32 });
 }
 
 function humidityScore(rh) {
@@ -132,7 +132,7 @@ function computeSleepQuality(reading, weights = DEFAULT_WEIGHTS) {
     sound: soundScore(reading.sound),
     light: lightScore(reading.light),
   };
-  const score =
+  let score =
     subs.heartRate * weights.heartRate +
     subs.motion * weights.motion +
     subs.temp * weights.temp +
@@ -140,6 +140,9 @@ function computeSleepQuality(reading, weights = DEFAULT_WEIGHTS) {
     subs.sound * weights.sound +
     subs.light * weights.light;
 
+  if (heartRate === 0){
+    score = 0;
+  }
   return Math.round(score * 100) / 100;
 }
 

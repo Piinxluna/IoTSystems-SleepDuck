@@ -1,9 +1,4 @@
 export function updateData(data) {
-  // Update dependent values
-  // updateSleepQuality();
-  // updateLightLevel();
-  // updateSoundLevel();
-
   // Update display
   const { heartRate, humid, light, motion, sound, temp } = data
 
@@ -15,9 +10,9 @@ export function updateData(data) {
     motion != 0 ? 'Detected' : 'Not Detected'
   }`
   document.getElementById('light-level').innerText = `${lightLevel}`
-  document.getElementById('light-data').innerText = `(${round(light)} lux)`
+  document.getElementById('light-data').innerText = `(${round(light)} points)`
   document.getElementById('sound-level').innerText = `${soundLevel}`
-  document.getElementById('sound-data').innerText = `(${round(sound)} db)`
+  document.getElementById('sound-data').innerText = `(${round(sound)} points)`
   document.getElementById('humidity-data').innerText = `${round(humid)}`
   document.getElementById('temperature-data').innerText = `${round(temp, 1)}`
 }
