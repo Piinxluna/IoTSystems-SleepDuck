@@ -36,7 +36,7 @@
     <div class="p-4 border border-gray-300 bg-white rounded-2xl flex justify-between items-center gap-4">
       <div class="flex flex-col">
         <p class="text-lg font-bold">Raspberry Pi 5</p>
-        <p class="text-sm">Measure: Light, Temperature, Humidity, Sound</p>
+        <p class="text-sm">Measure: Sleep Posture, Brightness, Temperature, Humidity, Sound</p>
       </div>
       <div class="flex flex-row items-center gap-2 py-2 px-3 rounded-full border">
         <div id="raspberry-pi-5-status-indicator" class="h-3 w-3 bg-green-500 rounded-full"></div>
@@ -45,18 +45,38 @@
     </div>
   </div>
 
+  <!-- Setting for light on & off time -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <p class="text-xl font-bold col-span-1 sm:col-span-2">Schedule Room Light</p>
+    <div class="p-4 border border-gray-300 bg-white rounded-2xl flex justify-between items-center gap-4">
+      <div class="flex flex-col">
+        <div class="flex flex-row gap-1 items-center">
+          <i class="fa-solid fa-sun"></i>
+          <p class="text-lg font-bold">Turn on</p>
+        </div>
+        <p class="text-sm">Set turn on time in the morning</p>
+      </div>
+      <div class="flex flex-row items-center gap-2 py-2 px-3 rounded-full border">
+        <input type="time" id="light-on-time-data" step="60" class="font-semibold">
+      </div>
+    </div>
+    <div class="p-4 border border-gray-300 bg-white rounded-2xl flex justify-between items-center gap-4">
+      <div class="flex flex-col">
+        <div class="flex flex-row gap-1 items-center">
+          <i class="fa-solid fa-moon"></i>
+          <p class="text-lg font-bold">Turn off</p>
+        </div>
+        <p class="text-sm">Set turn off time in the evening</p>
+      </div>
+      <div class="flex flex-row items-center gap-2 py-2 px-3 rounded-full border">
+        <input type="time" id="light-off-time-data" step="60" class="font-semibold">
+      </div>
+    </div>
+  </div>
+
   <!-- Overview status -->
   <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
     <p class="text-xl font-bold col-span-1 sm:col-span-2">Current</p>
-    <div class="hidden">
-      <span id="kpi-score"></span>
-      <span id="kpi-hr"></span>
-      <span id="kpi-motion"></span>
-      <span id="kpi-light"></span>
-      <span id="kpi-sound"></span>
-      <span id="kpi-hum"></span>
-      <span id="kpi-temp"></span>
-    </div>
     <div class="p-4 border border-gray-300 bg-white rounded-2xl flex flex-col gap-2 col-span-1 sm:col-span-2">
       <div class="flex flex-col justify-between">
         <div class="flex item-center gap-4">
@@ -90,7 +110,7 @@
     <div class="p-4 border border-gray-300 bg-white rounded-2xl flex flex-col gap-2">
       <div class="flex item-center gap-4">
         <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
-          <i class="fa-solid fa-person" style="color: red"></i>
+          <i class="fa-solid fa-user" style="color: red"></i>
         </div>
         <div>
           <p class="text-lg font-bold">Motion</p>
@@ -108,16 +128,52 @@
     <div class="p-4 border border-gray-300 bg-white rounded-2xl flex flex-col gap-2">
       <div class="flex item-center gap-4">
         <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
+          <i class="fa-solid fa-person" style="color: red"></i>
+        </div>
+        <div>
+          <p class="text-lg font-bold">Sleep Posture</p>
+          <p class="text-sm">Tracks posture during sleep</p>
+        </div>
+      </div>
+      <div class="flex flex-col gap-2">
+        <div>
+          <span id="posture-data" class="text-lg font-semibold">Loading</span>
+          <!-- <span>Events</span> -->
+        </div>
+        <p class="text-sm"></p>
+      </div>
+    </div>
+    <div class="p-4 border border-gray-300 bg-white rounded-2xl flex flex-col gap-2">
+      <div class="flex item-center gap-4">
+        <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
+          <i class="fa-solid fa-adjust" style="color: red"></i>
+        </div>
+        <div>
+          <p class="text-lg font-bold">Room Light</p>
+          <p class="text-sm">Room light current state</p>
+        </div>
+      </div>
+      <div class="flex flex-col gap-2">
+        <div>
+          <span id="light-data" class="text-lg font-semibold">Loading</span>
+          <!-- <span>Events</span> -->
+        </div>
+        <p class="text-sm"></p>
+      </div>
+    </div>
+    <div class="p-4 border border-gray-300 bg-white rounded-2xl flex flex-col gap-2">
+      <div class="flex item-center gap-4">
+        <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
           <i class="fa-solid fa-lightbulb" style="color: red"></i>
         </div>
         <div>
-          <p class="text-lg font-bold">Light Level</p>
+          <p class="text-lg font-bold">Brightness Level</p>
           <p class="text-sm">Room Brightness</p>
         </div>
       </div>
       <div>
-        <span id="light-level" class="text-lg font-semibold">Loading</span>
-        <span id="light-data" class="text-sm">Loading</span>
+        <span id="brightness-level" class="text-lg font-semibold">Loading</span>
+        <span id="brightness-data" class="text-sm">Loading</span>
       </div>
       <p class="text-xs ">Comfort: less than or equal 3 lux</p>
     </div>
@@ -173,8 +229,8 @@
   <!-- Live data; Chart -->
   <div class="flex flex-col gap-4">
     <div class="flex items-baseline gap-2">
-      <p class="text-xl font-bold">Live Data</p>
-      <p class="text-sm text-gray-600">( Latest one day )</p>
+      <p class="text-xl font-bold">Live & Historical Data</p>
+      <p class="text-sm text-gray-600">( Last day )</p>
     </div>
     <div class="p-4 border border-gray-300 bg-white rounded-2xl flex flex-col gap-2">
       <div>
@@ -192,10 +248,10 @@
     </div>
     <div class="p-4 border border-gray-300 bg-white rounded-2xl flex flex-col gap-2">
       <div>
-        <p class="text-lg font-bold">Light</p>
-        <p class="text-sm">Ambient light</p>
+        <p class="text-lg font-bold">Brightness</p>
+        <p class="text-sm">Ambient brightness</p>
       </div>
-      <div id="light-chart" style="width:100%;max-width:800px" class="mx-auto"></div>
+      <div id="brightness-chart" style="width:100%;max-width:800px" class="mx-auto"></div>
     </div>
     <div class="p-4 border border-gray-300 bg-white rounded-2xl flex flex-col gap-2">
       <div>

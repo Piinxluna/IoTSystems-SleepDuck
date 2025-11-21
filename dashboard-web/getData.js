@@ -2,7 +2,7 @@ import { updateData } from './updateData.js'
 import { updateChart } from './updateChart.js'
 
 async function getData() {
-  const url = 'https://iot-systems-sleep-duck.vercel.app/data/latest-24-hours'
+  const url = 'https://iot-systems-sleep-duck.vercel.app/data/sensor/last-day'
   try {
     const response = await fetch(url, { cache: 'no-store' })
 
