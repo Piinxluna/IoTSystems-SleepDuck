@@ -11,8 +11,8 @@ lightOnInput.addEventListener('change', () => {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      lightOnHour: hour,
-      lightOnMin: minute,
+      lightOnHour: hour.toString(),
+      lightOnMin: minute.toString(),
     }),
   })
 })
@@ -25,8 +25,8 @@ lightOffInput.addEventListener('change', () => {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      lightOffHour: hour,
-      lightOffMin: minute,
+      lightOffHour: hour.toString(),
+      lightOffMin: minute.toString(),
     }),
   })
 })
