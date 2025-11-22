@@ -95,7 +95,7 @@ const readLastDayPoints = async (type) => {
       |> filter(fn: (r) => r["_measurement"] == "${type}")
       |> filter(fn: (r) => r["deviceId"] == "${deviceId}")
       |> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")
-      |> sort(columns: ["_time"], desc: true)
+      |> sort(columns: ["_time"], desc: false)
   `
 
   try {
