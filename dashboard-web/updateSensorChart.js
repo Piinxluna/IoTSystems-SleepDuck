@@ -115,7 +115,7 @@ const heartRateOptions = {
 
 // ----------- Motion Options -----------
 const motionOptions = {
-  chart: { ...standardLineChartConfig },
+  chart: { ...standardLineChartConfig, height: 200 },
   stroke: {
     curve: 'smooth',
     width: 2,
@@ -128,10 +128,16 @@ const motionOptions = {
   },
   yaxis: {
     title: {
-      text: 'Rate (%)',
+      text: 'State',
     },
     min: 0,
-    max: 100,
+    max: 1,
+    tickAmount: 1,
+    labels: {
+      formatter: function (val) {
+        return val === 1 ? 'Motion' : 'No Motion'
+      },
+    },
   },
   title: {
     text: 'Motion Rate',
@@ -282,18 +288,18 @@ soundChart.render()
 humidChart.render()
 tempChart.render()
 
-export function updateChart(data) {
+export function updateSensorChart(data) {
   const processedData = data.reduce(
     (acc, element) => {
       // Parse all values safely with defaults
       const timestamp = element.currentTime
       const heartRate = parseInt(element.heartRate) || 0
-      const motion = parseInt(element.motion * 100)
+      const motion = element.motion ? 1 : 0
       const brightness = parseInt(element.brightness) || 0
       const sound = parseInt(element.sound) || 0
       const humidity = parseInt(element.humid) || 0
       const temperature = parseInt(element.temp) || 0
-      const sleepQuality = element.dataPoint || 0
+      const sleepQuality = parseInt(element.dataPoint) || 0
 
       // Add to arrays only if timestamp exists
       if (timestamp) {

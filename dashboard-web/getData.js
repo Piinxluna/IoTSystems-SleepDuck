@@ -1,18 +1,46 @@
-import { updateData } from './updateData.js'
-import { updateChart } from './updateChart.js'
+import { updateSensorData } from './updateSensorData.js'
+import { updatePostureData } from './updatePostureData.js'
+import { updateSettingData } from './updateSettingData.js'
+import { updateSensorChart } from './updateSensorChart.js'
+import { updatePostureChart } from './updatePostureChart.js'
+
+const backendUrl = `https://iotsystems-sleepduck-backend.onrender.com`
 
 async function getData() {
-  const url = 'https://iot-systems-sleep-duck.vercel.app/data/sensor/last-day'
   try {
-    const response = await fetch(url, { cache: 'no-store' })
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`)
+    const sensorHistory = await fetch(`${backendUrl}/data/sensor/last-day`, {
+      cache: 'no-store',
+    })
+    const sensorData = await sensorHistory.json()
+    if (Array.isArray(sensorData) && sensorData.length > 0) {
+      updateSensorData(sensorData[sensorData.length - 1])
+      updateSensorChart(sensorData)
+    } else {
+      updateSensorData(null)
+      updateSensorChart([])
     }
 
-    const result = await response.json()
-    updateData(result[result.length - 1])
-    updateChart(result)
+    const postureHistory = await fetch(`${backendUrl}/data/posture/last-day`, {
+      cache: 'no-store',
+    })
+    const postureData = await postureHistory.json()
+    if (Array.isArray(postureData) && postureData.length > 0) {
+      updatePostureData(postureData[postureData.length - 1])
+      updatePostureChart(postureData)
+    } else {
+      updatePostureData(null)
+      updatePostureChart([])
+    }
+
+    const settings = await fetch(`${backendUrl}/data/setting`, {
+      cache: 'no-store',
+    })
+    const settingData = await settings.json()
+    if (settingData) {
+      updateSettingData(settingData)
+    } else {
+      updateSettingData(null)
+    }
   } catch (error) {
     console.error(error.message)
   }
@@ -21,7 +49,7 @@ async function getData() {
 // Start the loop to constantly fetch data
 async function loop() {
   try {
-    getData()
+    await getData()
   } finally {
     setTimeout(loop, 10000)
   }
