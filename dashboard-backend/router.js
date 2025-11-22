@@ -7,54 +7,6 @@ router.get('/', (req, res) => {
   return res.status(200).json({ message: 'Hello world!' })
 })
 
-// -------------------------------- Sensor Data --------------------------------
-router.get('/data/sensor', async (req, res) => {
-  try {
-    const data = await readLastPoint('sensor')
-
-    if (!data) {
-      return res.status(200).json(null)
-    }
-
-    const quality = computeSleepQuality(data)
-
-    const formatData = {
-      ...data, // Spreads heartRate, temp, etc.
-      dataPoint: quality, // Adds your computed value
-      currentTime: data._time, // Renames _time to currentTime
-      _time: undefined, // (Optional) Removes the original _time key
-    }
-
-    return res.status(200).json(formatData)
-  } catch (err) {
-    console.error(err)
-    return res.status(500).json({ error: 'Failed to fetch data' })
-  }
-})
-
-router.get('/data/sensor/last-day', async (req, res) => {
-  try {
-    const data = await readLastDayPoints('sensor')
-
-    const formatData = data.map((item) => {
-      const quality = computeSleepQuality(item)
-
-      // Return the final clean object
-      return {
-        ...item, // Spreads heartRate, temp, etc.
-        dataPoint: quality, // Adds your computed value
-        currentTime: item._time, // Renames _time to currentTime
-        _time: undefined, // (Optional) Removes the original _time key
-      }
-    })
-
-    return res.status(200).json(formatData)
-  } catch (err) {
-    console.error(err)
-    return res.status(500).json({ error: 'Failed to fetch data' })
-  }
-})
-
 // -------------------------------- Posture & Setting Data --------------------------------
 router.get('/data/:type', async (req, res) => {
   try {

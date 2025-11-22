@@ -1,5 +1,6 @@
 require('dotenv').config()
 const { InfluxDB, Point } = require('@influxdata/influxdb-client')
+const { computeSleepQuality } = require('./utils')
 
 // config
 const token = process.env.INFLUX_TOKEN
@@ -23,6 +24,8 @@ const createPoint = async (type, data) => {
 
   switch (type) {
     case 'sensor':
+      const quality = computeSleepQuality(data)
+
       point = new Point('sensor')
         .tag('deviceId', deviceId)
         .intField('heartRate', data.heartRate)
@@ -32,7 +35,7 @@ const createPoint = async (type, data) => {
         .intField('sound', data.sound)
         .intField('brightness', data.brightness)
         .booleanField('light', data.light)
-      // .intField('dataPoint', data.dataPoint)
+        .intField('dataPoint', quality)
       break
 
     case 'posture':
