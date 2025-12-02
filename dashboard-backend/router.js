@@ -51,10 +51,22 @@ router.put('/data/setting', async (req, res) => {
     const currentSettings = await readLastPoint('setting')
     const body = req.body
     const newSettings = {
-      lightOnHour: body?.lightOnHour || currentSettings?.lightOnHour || 0,
-      lightOnMin: body?.lightOnMin || currentSettings?.lightOnMin || 0,
-      lightOffHour: body?.lightOffHour || currentSettings?.lightOffHour || 0,
-      lightOffMin: body?.lightOffMin || currentSettings?.lightOffMin || 0,
+      lightOnHour:
+        typeof body.lightOnHour === 'number'
+          ? body.lightOnHour
+          : currentSettings?.lightOnHour || 0,
+      lightOnMin:
+        typeof body.lightOnMin === 'number'
+          ? body.lightOnMin
+          : currentSettings?.lightOnMin || 0,
+      lightOffHour:
+        typeof body.lightOffHour === 'number'
+          ? body.lightOffHour
+          : currentSettings?.lightOffHour || 0,
+      lightOffMin:
+        typeof body.lightOffMin === 'number'
+          ? body.lightOffMin
+          : currentSettings?.lightOffMin || 0,
     }
 
     createPoint('setting', newSettings)
