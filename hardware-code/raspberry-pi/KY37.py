@@ -68,9 +68,7 @@ def read_sound():
 
 if __name__ == "__main__":
     print(f"DC Offset (Center Voltage): {dc_offset:.4f} V\n")
-    
     print("Reading sound levels. Press Ctrl+C to stop.")
-
     read_sound()
 
 # Code for the send part

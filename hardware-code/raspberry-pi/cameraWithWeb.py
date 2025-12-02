@@ -4,53 +4,9 @@ import mediapipe as mp
 from picamera2 import Picamera2
 import time
 import math
-from dotenv import load_dotenv
-import os
-import paho.mqtt.client as mqtt
 import signal
 import threading
 from flask import Flask, Response
-import ssl
-import json
-
-# -----------------------------
-# Load .env file
-# -----------------------------
-load_dotenv()
-HOST = os.getenv("MQTT_HOST")
-PORT = int(os.getenv("MQTT_PORT", "8883"))
-USERNAME = os.getenv("MQTT_USERNAME")
-PASSWORD = os.getenv("MQTT_PASSWORD")
-TOPIC = "posture"
-
-# -----------------------------
-# setup MQTT
-# -----------------------------
-def on_connect(client, userdata, flags, rc):
-    print("on_connect rc =", rc)           # 0 means success
-    if rc == 0:
-        print("Connected OK")
-    else:
-        print("Failed to connect, code:", rc)
-
-def on_publish(client, userdata, mid):
-    print("on_publish mid =", mid)
-
-def on_log(client, userdata, level, buf):
-    print("LOG:", buf)
-
-client = mqtt.Client()
-client.on_connect = on_connect
-client.on_publish = on_publish
-
-client.username_pw_set(USERNAME, PASSWORD)
-client.tls_set(cert_reqs=ssl.CERT_NONE)
-client.tls_insecure_set(True)
-
-# Connect (blocking)
-rc = client.connect(HOST, PORT, keepalive=60)
-# Wait for on_connect to run
-time.sleep(1)
 
 # -----------------------------
 # Picamera2 + MediaPipe init
@@ -144,61 +100,81 @@ def run_flask():
 # -----------------------------
 # Capture loop (runs in main thread)
 # -----------------------------
+latest_frame = None
+frame_lock = threading.Lock()
+pose_text = "No Pose"
+pose_lock = threading.Lock()
+running = True
+            
+def send_pose():
+    print('>> current pose', pose_text)
+    with pose_lock:
+        return pose_text
+
 def capture_loop():
-    global latest_frame, frame_lock, running
-
-    send_interval = 10.0
-    last_sent_at = 0.0
+    print('>> Loop start')
+    global latest_frame, running, pose_text
     pTime = time.time()
+    try:
+        with mp_pose.Pose(static_image_mode=False, model_complexity=1,
+                          min_detection_confidence=0.5, min_tracking_confidence=0.5) as pose:
+            while running:
+                try:
+                    frame = picam2.capture_array()   # might raise
+                except Exception as e:
+                    print("Camera capture error:", e)
+                    time.sleep(0.1)
+                    continue
 
-    client.loop_start()
+                # MediaPipe expects RGB
+                try:
+                    rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                    results = pose.process(rgb)
+                    landmarks = results.pose_landmarks
+                except Exception as e:
+                    print("MediaPipe processing error:", e)
+                    landmarks = None
 
-    with mp_pose.Pose(static_image_mode=False, model_complexity=1,
-                      min_detection_confidence=0.5, min_tracking_confidence=0.5) as pose:
-        while running:
-            frame = picam2.capture_array()        # BGR
+                # convert to gray for display
+                gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+                frame_disp = cv2.cvtColor(gray, cv2.COLOR_GRAY2BGR)
 
-            # ---- MediaPipe (requires RGB, NOT grayscale) ----
-            rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            results = pose.process(rgb)
-            landmarks = results.pose_landmarks
+                if landmarks:
+                    mp_drawing.draw_landmarks(frame_disp, landmarks, mp_pose.POSE_CONNECTIONS)
+                    new_pose = detect_sleep_pose(landmarks)
+                    print('>> log', new_pose)
+                    with pose_lock:
+                        pose_text = new_pose
+                else:
+                    # optional: update to say "No person detected"
+                    with pose_lock:
+                        # keep previous pose or set explicit:
+                        # pose_text = "No person detected"
+                        pass
 
-            # ---- Convert to grayscale for display ----
-            gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-            frame_disp = cv2.cvtColor(gray, cv2.COLOR_GRAY2BGR)  # back to 3-channel for drawing
+                # read a local copy of pose_text under lock for thread-safety
+                with pose_lock:
+                    local_pose = pose_text
 
-            pose_text = "No Pose"
-            if landmarks:
-                # draw landmarks on grayscale display frame
-                mp_drawing.draw_landmarks(frame_disp, landmarks, mp_pose.POSE_CONNECTIONS)
+                cv2.putText(frame_disp, local_pose, (20, 80),
+                            cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
 
-                pose_text = detect_sleep_pose(landmarks)
+                # FPS
+                cTime = time.time()
+                fps = 1.0 / max((cTime - pTime), 1e-6)
+                pTime = cTime
+                cv2.putText(frame_disp, f"FPS: {int(fps)}", (20, 40),
+                            cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 0), 2)
 
-                # ---- MQTT every 10 seconds ----
-                now = time.time()
-                if now - last_sent_at >= send_interval:
-                    payload = json.dumps({"posture": pose_text})
-                    try:
-                        pub = client.publish(TOPIC, payload, qos=0)
-                        print(f"MQTT Sent {pose_text}, rc={pub.rc}")
-                        last_sent_at = now
-                    except Exception as e:
-                        print("MQTT publish failed:", e)
+                # push final frame
+                with frame_lock:
+                    latest_frame = frame_disp.copy()
 
-            # ---- Text overlays ----
-            cv2.putText(frame_disp, pose_text, (20, 80),
-                        cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
-
-            # FPS
-            cTime = time.time()
-            fps = 1.0 / max((cTime - pTime), 1e-6)
-            pTime = cTime
-            cv2.putText(frame_disp, f"FPS: {int(fps)}", (20, 40),
-                        cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 0), 2)
-
-            # Push final grayscale frame
-            with frame_lock:
-                latest_frame = frame_disp.copy()
+                # small sleep to release CPU
+                time.sleep(0.001)
+    except Exception as e:
+        print("Unhandled error in capture_loop:", e)
+        running = False
 
 # -----------------------------
 # Signal handler for clean exit
@@ -213,8 +189,8 @@ signal.signal(signal.SIGTERM, handle_sigint)
 if __name__ == "__main__":
     # start Flask in background thread
     flask_thread = threading.Thread(target=run_flask, daemon=True)
+    print(">>>>>>>>>> Flask thread started")
     flask_thread.start()
-
     try:
         capture_loop()
     except Exception as e:
@@ -227,9 +203,6 @@ if __name__ == "__main__":
             picam2.close()
         except Exception:
             pass
-        client.loop_stop()
-        try:
-            client.disconnect()
         except Exception:
             pass
         print("Shutdown complete")

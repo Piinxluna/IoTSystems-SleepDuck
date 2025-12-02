@@ -7,7 +7,7 @@ i2c = busio.I2C(board.SCL, board.SDA)
 ads = ADS1115(i2c, address=0x48)
 ads.gain = 1  
 
-def read_light():
+def read_brightness():
     chan = AnalogIn(ads, 0)
     print("Press Ctrl+C to stop")
     try:
@@ -20,7 +20,7 @@ def read_light():
     except KeyboardInterrupt:
         pass
 
-def send_light():
+def send_brightness():
     try:
         chan = AnalogIn(ads, 0)
         brightness = (32767 - chan.value)*100/32767
@@ -29,4 +29,4 @@ def send_light():
         return 0
 
 if __name__ == "__main__":
-    read_light()
+    read_brightness()

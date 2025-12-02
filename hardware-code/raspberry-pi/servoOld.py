@@ -25,7 +25,7 @@ TOPIC = "setting"
 # stored as minutes after midnight, or None if not configured
 settings_lock = threading.Lock()
 current_setting = {
-    "lightOnMin": None,   # minutes after midnight
+    "lightOnMin": None,
     "lightOffMin": None
 }
 
@@ -43,7 +43,8 @@ def set_servo_angle(angle):
             servo.angle = angle
             _last_angle = angle
             # give servo time to move and settle
-            sleep(0.3)
+            sleep(0.5)
+            servo.value = None
         except Exception as e:
             print("Servo set angle error:", e)
 
@@ -83,6 +84,12 @@ def on_connect(client, userdata, flags, rc):
         print("Subscribed to:", TOPIC)
     else:
         print(f"MQTT connect failed with rc={rc}")
+
+def on_publish(client, userdata, mid):
+    print("on_publish mid =", mid)
+
+def on_log(client, userdata, level, buf):
+    print("LOG:", buf)
 
 def on_message(client, userdata, msg):
     payload_raw = msg.payload.decode("utf-8", errors="ignore")
@@ -142,7 +149,13 @@ client.on_disconnect = on_disconnect
 # -----------------------------
 # Control light loop
 # -----------------------------
+last_state = None          # None=unknown, True=on, False=off
+state_lock = threading.Lock()
+last_state_changed = None  # datetime when last_state last changed
+
 def control_light_loop():
+    global last_state, last_state_changed
+    
     # Connect and run MQTT background loop
     try:
         client.connect(HOST, PORT, keepalive=60)
@@ -153,13 +166,21 @@ def control_light_loop():
     client.loop_start()
     print("MQTT loop started, entering control loop...")
 
-    last_state = None  # None=unknown, True=on, False=off
-
     try:
+        # Initialize last_state from current settings so first actuation is consistent
+        now = datetime.now()
+        now_min = now.hour * 60 + now.minute
+        with settings_lock:
+            on_min = current_setting["lightOnMin"]
+            off_min = current_setting["lightOffMin"]
+        initial_should_be_on = is_light_on_now(now_min, on_min, off_min)
+        with state_lock:
+            last_state = None  # keep it None so code below will actuate to initial_should_be_on
+            last_state_changed = None
+
         while True:
             now = datetime.now()
             now_min = now.hour * 60 + now.minute
-            
             print(f"now min: {now_min}")
 
             with settings_lock:
@@ -170,20 +191,23 @@ def control_light_loop():
 
             # Only actuate if state changed
             if last_state is None:
-                # first iteration: set according to should_be_on
+                # first meaningful actuation
                 if should_be_on:
                     turn_on()
                 else:
                     turn_off()
-                last_state = should_be_on
+                with state_lock:
+                    last_state = should_be_on
+                    last_state_changed = datetime.now()
             elif should_be_on != last_state:
                 if should_be_on:
                     turn_on()
                 else:
                     turn_off()
-                last_state = should_be_on
+                with state_lock:
+                    last_state = should_be_on
+                    last_state_changed = datetime.now()
 
-            # sleep granularity: check every second
             time.sleep(1)
     except KeyboardInterrupt:
         print("Control loop interrupted by user.")
@@ -191,6 +215,10 @@ def control_light_loop():
         client.loop_stop()
         client.disconnect()
         print("Shutdown complete.")
+        
+def send_light_status():
+    with state_lock:
+        return last_state
 
 if __name__ == "__main__":
     control_light_loop()
