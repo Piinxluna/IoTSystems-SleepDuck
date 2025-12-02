@@ -52,19 +52,19 @@ router.put('/data/setting', async (req, res) => {
     const body = req.body
     const newSettings = {
       lightOnHour:
-        typeof body.lightOnHour === 'number'
+        typeof body.lightOnHour === 'number' || body.lightOnHour === 0
           ? body.lightOnHour
           : currentSettings?.lightOnHour || 0,
       lightOnMin:
-        typeof body.lightOnMin === 'number'
+        typeof body.lightOnMin === 'number' || body.lightOnMin === 0
           ? body.lightOnMin
           : currentSettings?.lightOnMin || 0,
       lightOffHour:
-        typeof body.lightOffHour === 'number'
+        typeof body.lightOffHour === 'number' || body.lightOffHour === 0
           ? body.lightOffHour
           : currentSettings?.lightOffHour || 0,
       lightOffMin:
-        typeof body.lightOffMin === 'number'
+        typeof body.lightOffMin === 'number' || body.lightOffMin === 0
           ? body.lightOffMin
           : currentSettings?.lightOffMin || 0,
     }
