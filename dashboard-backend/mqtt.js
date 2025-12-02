@@ -53,7 +53,14 @@ mqttClient.on('message', (topic, message) => {
 
 // UTILS
 const publishMQTTMessage = (topic, message) => {
-  mqttClient.publish(topic, message)
+  console.log(`Received ${topic}: ${message}`)
+  mqttClient.publish(topic, message.toString(), (err) => {
+    if (err) {
+      console.error(`Failed to publish message: ${err}`)
+    } else {
+      console.log(`Published successfully to ${topic}`)
+    }
+  })
 }
 
 module.exports = {

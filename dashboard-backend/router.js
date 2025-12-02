@@ -1,6 +1,6 @@
 const express = require('express')
 const { readLastDayPoints, readLastPoint, createPoint } = require('./db')
-const { computeSleepQuality } = require('./utils')
+const { publishMQTTMessage } = require('./mqtt')
 const router = express.Router({ mergeParams: true })
 
 router.get('/', (req, res) => {
@@ -58,6 +58,7 @@ router.put('/data/setting', async (req, res) => {
     }
 
     createPoint('setting', newSettings)
+    publishMQTTMessage('setting', JSON.stringify(newSettings))
 
     return res.status(200).json(newSettings)
   } catch (err) {
